@@ -261,3 +261,61 @@ class AddOnServiceManager {
         System.out.println("Total Additional Cost: $" + calculateTotalCost(reservationId));
     }
 }
+// ------------------ UC8: Booking History & Reporting ------------------
+
+class BookingHistoryService {
+
+    private List<BookingRecord> bookingHistory;
+
+    public BookingHistoryService() {
+        bookingHistory = new ArrayList<>();
+    }
+
+    // Add a confirmed booking to history
+    public void addBooking(String reservationId, String customerName, String roomType) {
+        bookingHistory.add(new BookingRecord(reservationId, customerName, roomType));
+        System.out.println("Booking added to history: " + reservationId + " (" + customerName + ")");
+    }
+
+    // Display all booking history
+    public void displayBookingHistory() {
+        System.out.println("\n=== Booking History ===");
+        if (bookingHistory.isEmpty()) {
+            System.out.println("No bookings recorded.");
+            return;
+        }
+        for (BookingRecord record : bookingHistory) {
+            System.out.println(record);
+        }
+    }
+
+    // Generate summary report: count of bookings per room type
+    public void generateReport() {
+        System.out.println("\n=== Booking Report ===");
+        Map<String, Integer> summary = new HashMap<>();
+        for (BookingRecord record : bookingHistory) {
+            summary.put(record.roomType, summary.getOrDefault(record.roomType, 0) + 1);
+        }
+        for (String type : summary.keySet()) {
+            System.out.println(type + " bookings: " + summary.get(type));
+        }
+    }
+}
+
+// Record class to store individual bookings
+class BookingRecord {
+    String reservationId;
+    String customerName;
+    String roomType;
+
+    public BookingRecord(String reservationId, String customerName, String roomType) {
+        this.reservationId = reservationId;
+        this.customerName = customerName;
+        this.roomType = roomType;
+    }
+
+    @Override
+    public String toString() {
+        return reservationId + " | " + customerName + " | " + roomType;
+    }
+}
