@@ -210,3 +210,54 @@ class RoomInventory {
         }
     }
 }
+// ------------------ UC7: Add-On Service Selection ------------------
+
+class Service {
+    String name;
+    double price;
+
+    public Service(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+}
+
+class AddOnServiceManager {
+
+    private Map<String, List<Service>> reservationServices; // reservationID -> list of services
+
+    public AddOnServiceManager() {
+        reservationServices = new HashMap<>();
+    }
+
+    // Attach one or more services to a reservation
+    public void addServices(String reservationId, List<Service> services) {
+        reservationServices.putIfAbsent(reservationId, new ArrayList<>());
+        reservationServices.get(reservationId).addAll(services);
+        System.out.println("Added " + services.size() + " service(s) to reservation " + reservationId);
+    }
+
+    // Calculate total cost of add-on services for a reservation
+    public double calculateTotalCost(String reservationId) {
+        List<Service> services = reservationServices.getOrDefault(reservationId, new ArrayList<>());
+        double total = 0;
+        for (Service s : services) {
+            total += s.price;
+        }
+        return total;
+    }
+
+    // Display services for a reservation
+    public void displayServices(String reservationId) {
+        List<Service> services = reservationServices.getOrDefault(reservationId, new ArrayList<>());
+        System.out.println("Reservation " + reservationId + " Add-On Services:");
+        if (services.isEmpty()) {
+            System.out.println("No add-on services selected.");
+            return;
+        }
+        for (Service s : services) {
+            System.out.println("- " + s.name + " : $" + s.price);
+        }
+        System.out.println("Total Additional Cost: $" + calculateTotalCost(reservationId));
+    }
+}
