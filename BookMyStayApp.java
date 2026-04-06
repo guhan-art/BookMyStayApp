@@ -319,3 +319,48 @@ class BookingRecord {
         return reservationId + " | " + customerName + " | " + roomType;
     }
 }
+// ------------------ UC9: Error Handling & Validation ------------------
+
+class InvalidBookingException extends Exception {
+    public InvalidBookingException(String message) {
+        super(message);
+    }
+}
+
+class BookingValidator {
+
+    private RoomInventory inventory;
+
+    public BookingValidator(RoomInventory inventory) {
+        this.inventory = inventory;
+    }
+
+    // Validate booking request
+    public void validateBooking(String customerName, String roomType) throws InvalidBookingException {
+        if (customerName == null || customerName.trim().isEmpty()) {
+            throw new InvalidBookingException("Customer name cannot be empty.");
+        }
+
+        if (!inventory.isRoomTypeExists(roomType)) {
+            throw new InvalidBookingException("Invalid room type: " + roomType);
+        }
+
+        if (!inventory.isRoomAvailable(roomType)) {
+            throw new InvalidBookingException("No available rooms for type: " + roomType);
+        }
+    }
+}
+
+// Extend RoomInventory to support UC9 checks
+class RoomInventoryUC9 extends RoomInventory {
+
+    // Check if room type exists
+    public boolean isRoomTypeExists(String type) {
+        return availability.containsKey(type);
+    }
+
+    // Check if room is available
+    public boolean isRoomAvailable(String type) {
+        return availability.getOrDefault(type, 0) > 0;
+    }
+}
