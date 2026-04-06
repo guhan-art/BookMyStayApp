@@ -9,11 +9,16 @@ public class BookMyStayApp {
         RoomInventory inventory = new RoomInventory();
         BookingManager manager = new BookingManager(inventory);
 
+        // UC5: Add booking requests
         manager.addBookingRequest("Rohan", "Single");
         manager.addBookingRequest("Aryan", "Double");
         manager.addBookingRequest("Kiran", "Suite");
-        manager.addBookingRequest("Rohan", "Single"); 
+        manager.addBookingRequest("Rohan", "Single");
 
+        // ✅ UC5: Display queue BEFORE processing
+        manager.displayRequests();
+
+        // ✅ UC6: Process bookings
         manager.processBookings();
 
         inventory.displayInventory();
@@ -49,7 +54,6 @@ class RoomInventory {
         System.out.println("\nRemaining Rooms:");
 
         for(String type : availability.keySet()){
-
             System.out.println(type + " : " + availability.get(type));
         }
     }
@@ -76,6 +80,17 @@ class BookingManager {
         System.out.println("Booking request added : " + name);
     }
 
+    // ✅ UC5: Display queue (FIFO, no removal)
+    public void displayRequests(){
+
+        System.out.println("\nBooking Requests (FIFO Order):");
+
+        for(BookingRequest request : queue){
+            System.out.println(request.customerName + " -> " + request.roomType);
+        }
+    }
+
+    // ✅ UC6: Processing + allocation
     public void processBookings(){
 
         System.out.println("\nProcessing bookings...");
