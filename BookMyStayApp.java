@@ -423,3 +423,54 @@ class RoomInventoryUC10 extends RoomInventory {
         availability.put(type, availability.getOrDefault(type, 0) + 1);
     }
 }
+// ------------------ UC11: Concurrent Booking Simulation ------------------
+
+import java.util.concurrent.*;
+
+// Runnable to simulate a guest submitting a booking concurrently
+class BookingTask implements Runnable {
+    private String customerName;
+    private String roomType;
+    private BookingManager bookingManager;
+
+    public BookingTask(String customerName, String roomType, BookingManager bookingManager) {
+        this.customerName = customerName;
+        this.roomType = roomType;
+        this.bookingManager = bookingManager;
+    }
+
+    @Override
+    public void run() {
+        bookingManager.addBookingRequest(customerName, roomType);
+    }
+}
+
+// Thread-safe BookingManager for concurrent processing
+class BookingManagerUC11 extends BookingManager {
+
+    public BookingManagerUC11(RoomInventory inventory) {
+        super(inventory);
+    }
+
+    // Synchronize to avoid race conditions during booking processing
+    @Override
+    public synchronized void processBookings() {
+        System.out.println("\nProcessing bookings concurrently...");
+
+        while (!queue.isEmpty()) {
+            BookingRequest request = queue.poll();
+
+            if (confirmedCustomers.contains(request.customerName)) {
+                System.out.println("Duplicate booking rejected : " + request.customerName);
+                continue;
+            }
+
+            if (inventory.bookRoom(request.roomType)) {
+                confirmedCustomers.add(request.customerName);
+                System.out.println("Booking confirmed : " + request.customerName);
+            } else {
+                System.out.println("No rooms available for " + request.customerName);
+            }
+        }
+    }
+}
