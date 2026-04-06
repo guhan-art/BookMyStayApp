@@ -474,3 +474,37 @@ class BookingManagerUC11 extends BookingManager {
         }
     }
 }
+import java.io.*;
+
+// ------------------ UC12: Data Persistence & System Recovery ------------------
+
+class PersistenceService {
+
+    private static final String DATA_FILE = "booking_data.ser";
+
+    // Save current booking and inventory state
+    public static void saveState(BookingManager bookingManager, RoomInventory inventory) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
+            oos.writeObject(bookingManager);
+            oos.writeObject(inventory);
+            System.out.println("System state saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error saving system state: " + e.getMessage());
+        }
+    }
+
+    // Load previously saved booking and inventory state
+    public static Object[] loadState() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DATA_FILE))) {
+            BookingManager bookingManager = (BookingManager) ois.readObject();
+            RoomInventory inventory = (RoomInventory) ois.readObject();
+            System.out.println("System state restored successfully.");
+            return new Object[]{bookingManager, inventory};
+        } catch (FileNotFoundException e) {
+            System.out.println("No saved state found. Starting fresh.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error restoring system state: " + e.getMessage());
+        }
+        return null;
+    }
+}
