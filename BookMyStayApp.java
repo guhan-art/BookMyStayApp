@@ -364,3 +364,62 @@ class RoomInventoryUC9 extends RoomInventory {
         return availability.getOrDefault(type, 0) > 0;
     }
 }
+// ------------------ UC10: Booking Cancellation & Inventory Rollback ------------------
+
+import java.util.*;
+
+// Custom exception for invalid cancellations
+class CancellationException extends Exception {
+    public CancellationException(String message) {
+        super(message);
+    }
+}
+
+// Service to handle booking cancellations
+class CancellationService {
+
+    private RoomInventory inventory;
+    private BookingManager bookingManager;
+    private Stack<String> rollbackStack; // Tracks released room IDs
+
+    public CancellationService(RoomInventory inventory, BookingManager bookingManager) {
+        this.inventory = inventory;
+        this.bookingManager = bookingManager;
+        this.rollbackStack = new Stack<>();
+    }
+
+    // Cancel a booking safely
+    public void cancelBooking(String customerName) throws CancellationException {
+        if (!bookingManager.isBookingConfirmed(customerName)) {
+            throw new CancellationException("No confirmed booking found for: " + customerName);
+        }
+
+        String roomType = bookingManager.getRoomTypeForCustomer(customerName);
+
+        // Rollback inventory
+        inventory.incrementRoom(roomType);
+
+        // Record rollback in stack
+        rollbackStack.push(customerName + ":" + roomType);
+
+        // Remove from confirmed bookings
+        bookingManager.removeConfirmedBooking(customerName);
+
+        System.out.println("Booking cancelled and inventory rolled back for: " + customerName);
+    }
+
+    // Optional: view rollback history
+    public void displayRollbackHistory() {
+        System.out.println("\nRollback History (most recent first):");
+        for (int i = rollbackStack.size() - 1; i >= 0; i--) {
+            System.out.println(rollbackStack.get(i));
+        }
+    }
+}
+
+// Extend RoomInventory to support incrementing rooms for rollback
+class RoomInventoryUC10 extends RoomInventory {
+    public void incrementRoom(String type) {
+        availability.put(type, availability.getOrDefault(type, 0) + 1);
+    }
+}
